@@ -24,27 +24,26 @@ module.exports = async ({ getNamedAccounts, deployments }) => {
         subscriptionId = networkConfig[chainId]['subscriptionId']
     }
 
-    const ENTRANCE_FEE = networkConfig[chainId]['entranceFee'] || ethers.utils.parseEther("0.01")
+    const MINT_PRICE = networkConfig[chainId]['mintPrice'] || ethers.utils.parseEther("0.01")
     const KEYHASH = networkConfig[chainId]['keyHash']
-    const CALLBACK_GAS_LIMIT = networkConfig[chainId]['callbackGasLimit'] || 500000
-    const INTERVAL = networkConfig[chainId]['interval'] || 60
-    const args = [vrfCoordinatorAddress, ENTRANCE_FEE, KEYHASH, subscriptionId, CALLBACK_GAS_LIMIT, INTERVAL]
+    const args = [subscriptionId, vrfCoordinatorAddress, MINT_PRICE]
 
-    const raffle = await deploy("Raffle", {
+    const nft = await deploy("SVGNFT", {
         from: deployer,
         args: args,
         log: true,
         waitConfirmations: network.config.blockConfirmations || 1,
     })
+    // const nft = await ethers.getContract("SVGNFT")
 
     if (chainId == 31337) {
-        await vrfCoordinatorV2Mock.addConsumer(subscriptionId.toNumber(), raffle.address)
+        await vrfCoordinatorV2Mock.addConsumer(subscriptionId.toNumber(), nft.address)
     }
 
     if (!developmentChains.includes(network.name) && process.env.ETHERSCAN_API_KEY) {
-        await verify(raffle.address, args)
+        await verify(nft.address, args)
     }
     log("========================================================================================================================================")
 }
 
-module.exports.tags = ["all", "raffle"]
+module.exports.tags = ["all", "nft"]

@@ -2,9 +2,9 @@ const { network, ethers, getNamedAccounts } = require("hardhat")
 
 async function main() {
     const { deployer } = await getNamedAccounts()
-    const fundMe = await ethers.getContract("FundMe", deployer)
+    const nft = await ethers.getContract("SVGNFT", deployer)
     console.log("Withdraw from contract...")
-    const transactionResponse = await fundMe.withdraw()
+    const transactionResponse = await nft.withdrawFunds()
     const transactionReceipt = await transactionResponse.wait(1)
     console.log("Withdrawn!")
 }
